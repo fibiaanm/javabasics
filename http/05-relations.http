@@ -1,0 +1,39 @@
+### Block 5 - Relations and the owning side
+### Select the "local" environment. Run the seed first (or create customers/products by hand).
+
+### Sample data: change the numbers to grow or shrink the dataset
+POST {{host}}/admin/seed?customers=5&products=5&salesPerCustomer=3&itemsPerSale=2
+
+### Create a sale. Look at SaleService.create: sale.addItem(item) fills the foreign key.
+### Also notice the stock decrement: there is no save() for the product.
+POST {{host}}/sales
+Content-Type: application/json
+
+{
+  "customerId": {{customerId}},
+  "items": [
+    { "productId": {{productId}}, "quantity": 2 }
+  ]
+}
+
+### Not enough stock -> 409 (the transaction rolls back, nothing is saved)
+POST {{host}}/sales
+Content-Type: application/json
+
+{
+  "customerId": {{customerId}},
+  "items": [
+    { "productId": {{productId}}, "quantity": 1000000 }
+  ]
+}
+
+### List sales - NAIVE. Watch the console: count the SELECTs (we fix this in block 7)
+### Q: how many queries for 15 sales?
+GET {{host}}/sales
+
+### Get one sale
+GET {{host}}/sales/{{saleId}}
+
+### Who owns the foreign key?
+### Q: if I add the sale to customer.getSales(), does sales.customer_id change?
+GET {{host}}/demo/owner-side?saleId={{saleId}}&newCustomerId={{newCustomerId}}
