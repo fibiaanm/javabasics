@@ -1,0 +1,28 @@
+### Block 8 - JPQL, DTO projections and pagination
+### Select the "local" environment. Needs the seed from 07-fetching.http (100 sales).
+
+### JPQL: "s.customer.id" is a property path, not a column name
+### Q: does it need a join to customers? (look at the SQL in the console)
+GET {{host}}/demo/queries/by-customer?customerId={{customerId}}
+
+### DTO projection: compare with /demo/fetch/n-plus-one
+### Q: why load a whole entity when we only need four columns?
+### Look at "entitiesLoaded": nothing enters the persistence context.
+GET {{host}}/demo/queries/summaries
+
+### Page: change page and size to navigate
+### Q: why are there two SQL statements? Which one is the COUNT?
+GET {{host}}/demo/queries/page?page=0&size=10
+
+### Slice: same data, no COUNT
+### Q: how does a Slice know whether there is a next page?
+GET {{host}}/demo/queries/slice?page=0&size=10
+
+### Last pages
+GET {{host}}/demo/queries/page?page=10&size=10
+
+### Pagination + collection fetch join (entities, not a projection)
+### Q: look at the SQL: where does Hibernate 7 apply the limit? (inside a subquery on sales)
+### Q: this is a Page of 10 sales, so why are there ~40 entities loaded?
+### Older Hibernate versions paginate this IN MEMORY (warning HHH000104): know the symptom.
+GET {{host}}/demo/queries/page-fetch-collection?page=0&size=10
