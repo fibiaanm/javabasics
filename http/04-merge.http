@@ -1,0 +1,33 @@
+### Block 4 - persist() versus merge()
+### Select the "local" environment. Needs at least one product (see 01-entities.http).
+
+### merge() returns ANOTHER instance; persist() rejects detached objects
+### Q: is the object we pass to merge() managed afterwards?
+### Q: why does persist() fail on an object that already has an id?
+GET {{host}}/demo/merge?productId={{productId}}
+
+### See the current state of the product before the dangerous call
+GET {{host}}/products/{{productId}}
+
+### DANGER: PUT is built on merge(request.toEntity()).
+### The body has no "stock": toEntity() turns the missing value into 0 and merge() OVERWRITES the real stock.
+### Q: what is the stock after this call? Compare with the PATCH in 03-dirty-checking.http
+PUT {{host}}/products/{{productId}}
+Content-Type: application/json
+
+{
+  "name": "Renamed by PUT"
+}
+
+### Check the damage
+GET {{host}}/products/{{productId}}
+
+### DANGER 2: PUT on an id that does not exist. merge() finds no row to update and fails
+### with a misleading "Row was already updated or deleted" (500) instead of a clean 404.
+PUT {{host}}/products/99999
+Content-Type: application/json
+
+{
+  "name": "Ghost product",
+  "stock": 1
+}

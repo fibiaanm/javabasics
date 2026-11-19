@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.javabasics.web.NotFoundException;
 import com.example.javabasics.web.ProductPatchRequest;
+import com.example.javabasics.web.ProductReplaceRequest;
 
 @Service
 public class ProductService {
@@ -31,5 +32,17 @@ public class ProductService {
             product.setStock(request.stock());
         }
         return product;
+    }
+
+    /**
+     * NAIVE on purpose. The request is turned into an entity that has an id, so save()
+     * calls em.merge(): every column is overwritten with the incoming values
+     * (a missing "stock" becomes 0). With an unknown id it fails with a confusing
+     * "Row was already updated or deleted" error.
+     * Compare with update(): load the managed entity and change only what was sent.
+     */
+    @Transactional
+    public Product replaceNaive(Long id, ProductReplaceRequest request) {
+        return repository.save(request.toEntity(id));
     }
 }

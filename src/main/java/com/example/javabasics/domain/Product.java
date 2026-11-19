@@ -30,6 +30,17 @@ public class Product {
         this.stock = stock;
     }
 
+    /**
+     * Builds an object that carries an id but is NOT loaded from the database.
+     * This is what "request.toEntity()" looks like: handing it to merge()/save()
+     * overwrites every column with whatever this object contains.
+     */
+    public Product(Long id, String name, int stock) {
+        this.id = id;
+        this.name = name;
+        this.stock = stock;
+    }
+
     public Long getId() {
         return id;
     }
