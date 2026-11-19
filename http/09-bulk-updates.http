@@ -1,0 +1,27 @@
+### Block 9 - Bulk updates and the persistence context
+### Select the "local" environment.
+
+### Bulk update WITHOUT clearing the persistence context
+### Q: the database says active=false. What does em.find() return? Why?
+POST {{host}}/demo/bulk?clear=false
+
+### Same bulk update with clearAutomatically = true
+### Q: why does em.find() now see the real value?
+### Q: what is the state of the object we were holding (productIsStillManaged)?
+POST {{host}}/demo/bulk?clear=true
+
+### The real endpoint: one UPDATE, no entity loaded (see ProductRepository)
+### First make a product without stock:
+POST {{host}}/products
+Content-Type: application/json
+
+{
+  "name": "Out of stock thing",
+  "stock": 0
+}
+
+### Deactivate all the products without stock
+POST {{host}}/products/deactivate-without-stock
+
+### Check the "active" flag
+GET {{host}}/products

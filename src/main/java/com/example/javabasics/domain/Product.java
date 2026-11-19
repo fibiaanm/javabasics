@@ -21,6 +21,9 @@ public class Product {
     @Column(nullable = false)
     private int stock;
 
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean active = true;
+
     // JPA requires a no-arg constructor (it can be protected)
     protected Product() {
     }
@@ -59,5 +62,13 @@ public class Product {
 
     public void setStock(int stock) {
         this.stock = stock;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

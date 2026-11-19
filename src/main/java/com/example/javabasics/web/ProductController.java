@@ -1,6 +1,7 @@
 package com.example.javabasics.web;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,12 @@ public class ProductController {
     public ProductController(ProductRepository repository, ProductService service) {
         this.repository = repository;
         this.service = service;
+    }
+
+    /** One bulk UPDATE for all the products without stock (no entity is loaded). */
+    @PostMapping("/deactivate-without-stock")
+    public Map<String, Integer> deactivateWithoutStock() {
+        return Map.of("deactivated", repository.deactivateWithoutStockAndClear());
     }
 
     /** NAIVE full replace built on merge(): see ProductService.replaceNaive. */
