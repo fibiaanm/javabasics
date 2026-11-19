@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "products")
@@ -23,6 +24,12 @@ public class Product {
 
     @Column(nullable = false, columnDefinition = "boolean default true")
     private boolean active = true;
+
+    // Optimistic locking: every UPDATE is "... where id = ? and version = ?" and bumps the version.
+    // If another transaction got there first, 0 rows match and JPA fails instead of overwriting.
+    @Version
+    @Column(nullable = false, columnDefinition = "bigint default 0")
+    private long version;
 
     // JPA requires a no-arg constructor (it can be protected)
     protected Product() {
@@ -62,6 +69,10 @@ public class Product {
 
     public void setStock(int stock) {
         this.stock = stock;
+    }
+
+    public long getVersion() {
+        return version;
     }
 
     public boolean isActive() {

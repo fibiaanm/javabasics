@@ -1,0 +1,31 @@
+### Block 10 - Concurrency in JPA: @Version and locks
+### Select the "local" environment. Every demo uses its own temporary product.
+
+### Two users, same row. B reads, A changes and commits, B tries to commit.
+### Q: what version did A and B load? What happened to B? What would happen without @Version?
+POST {{host}}/demo/locking/optimistic?initialStock=10
+
+### Controlled retry: a conflict is injected on the first attempt
+### Q: why must the retry start a NEW transaction and reload the entity?
+POST {{host}}/demo/locking/optimistic-retry?increment=5&maxAttempts=3
+
+### Not enough attempts: set maxAttempts=1 and the retry never happens
+POST {{host}}/demo/locking/optimistic-retry?increment=5&maxAttempts=1
+
+### Pessimistic locking: A holds the lock, B does not wait
+### Q: when is this better than @Version? What does it cost?
+POST {{host}}/demo/locking/pessimistic
+
+### @Version also protects the naive PUT from block 4:
+### the incoming object has version 0, so once the product has been updated the merge is rejected (409).
+### Note the "version" field in the response, it grows with every UPDATE.
+GET {{host}}/products/{{productId}}
+
+###
+PUT {{host}}/products/{{productId}}
+Content-Type: application/json
+
+{
+  "name": "Replaced by PUT",
+  "stock": 5
+}
