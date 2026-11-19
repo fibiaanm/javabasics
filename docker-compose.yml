@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:16
+    container_name: javabasics-db
+    environment:
+      POSTGRES_DB: javabasics
+      POSTGRES_USER: javabasics
+      POSTGRES_PASSWORD: javabasics
+    ports:
+      - "5432:5432"
+    volumes:
+      - javabasics-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U javabasics -d javabasics"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  javabasics-pgdata:
