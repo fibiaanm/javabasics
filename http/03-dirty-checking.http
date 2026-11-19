@@ -1,0 +1,42 @@
+### Block 3 - Dirty checking, flush and transactions
+### Select the "local" environment. Needs at least one product (see 01-entities.http).
+
+### PATCH a product. Look at ProductService.update: there is no save() call.
+### Q: why is there an UPDATE if we never call save()?
+### Q: what would happen without @Transactional?
+PATCH {{host}}/products/{{productId}}
+Content-Type: application/json
+
+{
+  "stock": 25
+}
+
+### Partial update: only the name (stock stays untouched)
+PATCH {{host}}/products/{{productId}}
+Content-Type: application/json
+
+{
+  "name": "Mechanical keyboard"
+}
+
+### PATCH a product that does not exist
+PATCH {{host}}/products/99999
+Content-Type: application/json
+
+{
+  "stock": 1
+}
+
+### Dirty checking: a change produces 1 UPDATE, the same value again produces 0
+### Q: what does Hibernate compare to decide the entity is dirty?
+POST {{host}}/demo/dirty-checking?productId={{productId}}&stock=50
+
+### Flush step by step (rollback=true: executed but never committed)
+### Q: setStock was called 3 times, how many UPDATEs before the first flush?
+### Q: why did the JPQL query flush before running?
+### Q: what is the stock in the DB after a rollback?
+POST {{host}}/demo/flush?productId={{productId}}&rollback=true
+
+### Same flow but committed
+### Q: save() vs flush() vs commit - which one makes the change permanent?
+POST {{host}}/demo/flush?productId={{productId}}&rollback=false
