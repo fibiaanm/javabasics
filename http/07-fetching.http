@@ -1,0 +1,24 @@
+### Block 7 - LAZY, N+1 and fetch plans
+### Select the "local" environment. Seed enough data to feel the problem: more sales = more queries.
+
+### More data: 20 customers x 5 sales x 3 items = 100 sales
+POST {{host}}/admin/seed?customers=20&products=10&salesPerCustomer=5&itemsPerSale=3
+
+### THE PROBLEM: one listing, how many SQL statements?
+### Q: how does the number grow when we add more sales?
+GET {{host}}/demo/fetch/n-plus-one
+
+### FIX 1: fetch plan declared with @EntityGraph (SaleRepository.findAllWithEntityGraph)
+GET {{host}}/demo/fetch/entity-graph
+
+### FIX 2: fetch plan written in the query (SaleRepository.findAllJoinFetch)
+### Q: why "left join fetch" and why "distinct"?
+GET {{host}}/demo/fetch/join-fetch
+
+### LAZY is not magic: getReference() gives a proxy, SQL only when you read a property
+### Q: which call finally triggers the SELECT?
+GET {{host}}/demo/lazy/proxy?productId={{productId}}
+
+### The classic error: reading a LAZY association after the transaction ended
+### Q: why does it work in the listing but fail here? (open-in-view is off)
+GET {{host}}/demo/lazy/outside-tx?saleId={{saleId}}

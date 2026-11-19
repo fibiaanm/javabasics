@@ -55,6 +55,16 @@ public class SaleService {
     }
 
     @Transactional(readOnly = true)
+    public List<SaleResponse> findAllWithEntityGraph() {
+        return saleRepository.findAllWithEntityGraph().stream().map(SaleResponse::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<SaleResponse> findAllWithJoinFetch() {
+        return saleRepository.findAllJoinFetch().stream().map(SaleResponse::from).toList();
+    }
+
+    @Transactional(readOnly = true)
     public SaleResponse findById(Long id) {
         return saleRepository.findById(id)
                 .map(SaleResponse::from)
