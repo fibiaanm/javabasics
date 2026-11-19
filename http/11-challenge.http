@@ -1,0 +1,47 @@
+### Block 11 - Final challenge
+### Select the "local" environment. Needs data: run the seed in 05-relations.http first.
+### rollback=true (default) executes the code but undoes it, so you can repeat as many times as you want.
+### rollback=false makes the damage permanent (re-seed afterwards).
+
+### THE CHALLENGE: open demo/ChallengeService.java and read updateSaleBroken.
+### Q: what do you expect to happen? Which fields change?
+### Q: now run it. What happened to the items of the sale? And to the note?
+### Q: find as many problems as you can (there are at least six).
+PUT {{host}}/challenge/broken?rollback=true
+Content-Type: application/json
+
+{
+  "saleId": {{saleId}},
+  "customerId": {{customerId}},
+  "note": "Updated from the request"
+}
+
+### The fix: load the managed entity and let dirty checking do the work
+### Compare itemsBefore/itemsAfter and the number of statements with the broken one.
+PUT {{host}}/challenge/fixed?rollback=true
+Content-Type: application/json
+
+{
+  "saleId": {{saleId}},
+  "customerId": {{customerId}},
+  "note": "Updated from the request"
+}
+
+
+###########################################################################################
+### INSTRUCTOR NOTES - problems in updateSaleBroken (do not show before the exercise)
+###
+### 1. request.toEntity() builds a Sale that was never loaded: its "items" list is empty.
+###    merge() copies that state onto the managed Sale, and with cascade ALL + orphanRemoval
+###    every existing item is DELETED (see "itemsAfter" = 0 and "deletes").
+### 2. merge() does not make "sale" managed: it returns another instance, which is ignored.
+### 3. sale.setNote("final note") changes an unmanaged object: that change is never saved
+###    (the note in the database is the one from the request, not "final note").
+### 4. The two flush() calls are pointless: the second one finds nothing to write.
+### 5. sale.getCustomer().getSales() is a plain, empty list on an object built by hand; with a
+###    real loaded customer it would be a LAZY collection and a hidden extra query.
+### 6. The request is turned straight into an entity: a client-controlled object reaches the
+###    persistence layer (mass assignment, overwritten columns, createdAt, version...).
+### 7. There is no version check (@Version on Sale): two concurrent updates silently overwrite
+###    each other.
+###########################################################################################

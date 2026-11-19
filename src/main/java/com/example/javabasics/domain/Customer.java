@@ -32,6 +32,13 @@ public class Customer {
     protected Customer() {
     }
 
+    /** An object that carries an id but was not loaded from the database (see Product). */
+    public Customer(Long id, String name, String email) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+    }
+
     /** Keeps both sides of the bidirectional relation in sync. */
     public void addSale(Sale sale) {
         sales.add(sale);

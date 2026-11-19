@@ -49,6 +49,13 @@ public class Sale {
         this.customer = customer;
     }
 
+    /** An object that carries an id but was not loaded from the database (see Product). */
+    public Sale(Long id, Customer customer, String note) {
+        this.id = id;
+        this.customer = customer;
+        this.note = note;
+    }
+
     /** Keeps both sides of the bidirectional relation in sync. */
     public void addItem(SaleItem item) {
         items.add(item);
