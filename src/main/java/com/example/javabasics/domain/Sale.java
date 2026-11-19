@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -35,7 +36,10 @@ public class Sale {
     private String note;
 
     // INVERSE side: mappedBy says "the foreign key lives in SaleItem.sale"
-    @OneToMany(mappedBy = "sale")
+    // cascade ALL: persisting/merging/removing a Sale does the same to its items.
+    // orphanRemoval: an item removed from this list is DELETED from the database.
+    // Items belong to ONE sale (composition), so this is safe. Never do it towards shared entities.
+    @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SaleItem> items = new ArrayList<>();
 
     protected Sale() {
@@ -49,6 +53,11 @@ public class Sale {
     public void addItem(SaleItem item) {
         items.add(item);
         item.setSale(this);
+    }
+
+    public void removeItem(SaleItem item) {
+        items.remove(item);
+        item.setSale(null);
     }
 
     public Long getId() {

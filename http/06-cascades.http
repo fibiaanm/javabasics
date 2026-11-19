@@ -1,0 +1,35 @@
+### Block 6 - Cascades and orphanRemoval
+### Select the "local" environment. Needs data: run the seed in 05-relations.http first.
+### Every demo here is rolled back, so you can repeat them as many times as you want.
+
+### Same POST /sales as before, but SaleService no longer saves the items one by one
+### (compare git diff jpa-05 jpa-06 -- SaleService.java)
+POST {{host}}/sales
+Content-Type: application/json
+
+{
+  "customerId": {{customerId}},
+  "items": [
+    { "productId": {{productId}}, "quantity": 1 }
+  ]
+}
+
+### Persist ONLY the sale: how many INSERTs?
+### Q: who inserted the items?
+POST {{host}}/demo/cascade/persist?customerId={{customerId}}&productId={{productId}}
+
+### orphanRemoval: remove one item from the list -> DELETE
+### Q: we never called a repository delete. Who deleted the row?
+POST {{host}}/demo/cascade/orphan-removal?saleId={{saleId}}
+
+### Remove the sale: REMOVE cascades to the items
+### Q: how is this different from ON DELETE CASCADE in the database?
+POST {{host}}/demo/cascade/remove-sale?saleId={{saleId}}
+
+### The trap: CascadeType.REMOVE towards a shared entity (see demo/TrapLine.java)
+### Q: what happened to the product when we deleted ONE line?
+POST {{host}}/demo/cascade/trap?shared=false
+
+### Same mapping, but another line still references the product: the flush fails
+### Q: it only "worked" because of the error. What would happen with a single line?
+POST {{host}}/demo/cascade/trap?shared=true

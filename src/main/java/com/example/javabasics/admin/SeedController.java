@@ -17,7 +17,6 @@ import com.example.javabasics.domain.Product;
 import com.example.javabasics.domain.ProductRepository;
 import com.example.javabasics.domain.Sale;
 import com.example.javabasics.domain.SaleItem;
-import com.example.javabasics.domain.SaleItemRepository;
 import com.example.javabasics.domain.SaleRepository;
 
 /** Creates sample data so the demos have something to work with. Parameters control the size. */
@@ -29,15 +28,13 @@ public class SeedController {
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
     private final SaleRepository saleRepository;
-    private final SaleItemRepository saleItemRepository;
 
     public SeedController(Tx tx, CustomerRepository customerRepository, ProductRepository productRepository,
-            SaleRepository saleRepository, SaleItemRepository saleItemRepository) {
+            SaleRepository saleRepository) {
         this.tx = tx;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
         this.saleRepository = saleRepository;
-        this.saleItemRepository = saleItemRepository;
     }
 
     @PostMapping("/seed")
@@ -61,15 +58,14 @@ public class SeedController {
                 Customer customer = customerRepository.save(
                         new Customer("Customer " + run + "-" + c, "customer-" + run + "-" + c + "@example.com"));
                 for (int s = 0; s < salesPerCustomer; s++) {
-                    Sale sale = saleRepository.save(new Sale(customer));
+                    Sale sale = new Sale(customer);
                     sales++;
                     for (int k = 0; k < itemsPerSale && !newProducts.isEmpty(); k++) {
                         Product product = newProducts.get((c + s + k) % newProducts.size());
-                        SaleItem item = new SaleItem(product, 1 + (k % 3));
-                        sale.addItem(item);
-                        saleItemRepository.save(item);
+                        sale.addItem(new SaleItem(product, 1 + (k % 3)));
                         items++;
                     }
+                    saleRepository.save(sale); // cascade saves the items
                 }
             }
             created.put("customers", customers);

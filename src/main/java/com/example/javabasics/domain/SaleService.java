@@ -14,14 +14,12 @@ import com.example.javabasics.web.SaleResponse;
 public class SaleService {
 
     private final SaleRepository saleRepository;
-    private final SaleItemRepository saleItemRepository;
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
 
-    public SaleService(SaleRepository saleRepository, SaleItemRepository saleItemRepository,
+    public SaleService(SaleRepository saleRepository,
             CustomerRepository customerRepository, ProductRepository productRepository) {
         this.saleRepository = saleRepository;
-        this.saleItemRepository = saleItemRepository;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
     }
@@ -35,7 +33,6 @@ public class SaleService {
                 .orElseThrow(() -> new NotFoundException("Customer " + request.customerId()));
 
         Sale sale = new Sale(customer);
-        saleRepository.save(sale);
 
         for (CreateSaleRequest.Line line : request.items()) {
             Product product = productRepository.findById(line.productId())
@@ -46,9 +43,9 @@ public class SaleService {
             product.setStock(product.getStock() - line.quantity()); // dirty checking, no save()
 
             SaleItem item = new SaleItem(product, line.quantity());
-            sale.addItem(item);          // sets item.sale (the owning side: this is what fills the FK)
-            saleItemRepository.save(item); // no cascade yet: every item must be saved explicitly
+            sale.addItem(item); // sets item.sale (the owning side: this is what fills the FK)
         }
+        saleRepository.save(sale); // CascadeType.ALL persists the items too
         return SaleResponse.from(sale);
     }
 
