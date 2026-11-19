@@ -1,0 +1,16 @@
+### Block 2 - Persistence context and entity states
+### Select the "local" environment. Needs at least one product: run 01-entities.http first.
+
+### Entity lifecycle: TRANSIENT -> MANAGED -> DETACHED -> MANAGED -> REMOVED
+### Q: when does the object become a row? (watch the INSERT in the console)
+### Q: what does em.find return after detach? Same instance or a new one?
+POST {{host}}/demo/states
+
+### First-level cache: two finds in one transaction = one SELECT, same instance
+### Q: why does a JPQL query still hit the DB but return the SAME instance?
+### Q: what changes when the two finds happen in two transactions?
+GET {{host}}/demo/identity?productId={{productId}}
+
+### Does modifying an object always produce an UPDATE?
+### Q: what happens to the change after the transaction is closed?
+GET {{host}}/demo/detached-change?productId={{productId}}&newStock=999
