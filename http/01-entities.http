@@ -1,0 +1,47 @@
+### Block 1 - Entities and repositories
+### Select the "local" environment (http-client.env.json) in IntelliJ.
+
+### Health
+GET {{host}}/health
+
+### Create a product  (watch the INSERT in the console)
+POST {{host}}/products
+Content-Type: application/json
+
+{
+  "name": "Keyboard",
+  "stock": 10
+}
+
+### List products
+GET {{host}}/products
+
+### Get a product by id  (change productId in http-client.env.json)
+GET {{host}}/products/{{productId}}
+
+### Product that does not exist
+GET {{host}}/products/99999
+
+### Create a customer
+POST {{host}}/customers
+Content-Type: application/json
+
+{
+  "name": "Ada Lovelace",
+  "email": "ada@example.com"
+}
+
+### List customers
+GET {{host}}/customers
+
+### Get a customer by id
+GET {{host}}/customers/{{customerId}}
+
+### Duplicate email  (unique constraint -> 500, we handle errors later)
+POST {{host}}/customers
+Content-Type: application/json
+
+{
+  "name": "Ada Again",
+  "email": "ada@example.com"
+}
